@@ -7,6 +7,6 @@ router=Router()
 async def show_products(message: Message, db):
     products = await db.get_products()
     await message.answer(
-        "🛍 Mahsulotlar:",
+        "Mahsulotlar:",
         reply_markup=products_inline(products)
     )

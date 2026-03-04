@@ -41,7 +41,7 @@ async def set_role(callback: CallbackQuery, db):
     )
 
     await callback.message.edit_text(
-        f"✅ User roli `{role}` ga o‘zgartirildi"
+         f"✅ User roli `{role}` ga o'zgartirildi"
     )
     await callback.answer("Role yangilandi")
 
