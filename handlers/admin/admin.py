@@ -45,7 +45,9 @@ async def set_role(callback: CallbackQuery, db):
     )
     await callback.answer("Role yangilandi")
 
-@router.callback_query(lambda c: c.data.startswith("Orqaga"),RoleFilter("Admin"))
-async def go_back(callback: CallbackQuery):
-    await callback.message.answer("🔙 Orqaga qaytish",reply_markup=start_reply_admin())
-    await callback.answer()
+@router.message(F.text == "⬅️ Orqaga", RoleFilter("Admin"))
+async def go_back(message: Message):
+    await message.answer(
+        "🔙 Orqaga qaytdingiz",
+        reply_markup=start_reply_admin()
+    )
