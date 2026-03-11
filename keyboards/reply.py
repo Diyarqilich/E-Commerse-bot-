@@ -12,7 +12,7 @@ def start_reply():
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Mahsulotlar"),KeyboardButton(text="Mening buyurtmalarim")],
-            [KeyboardButton(text="Profile")]
+            [KeyboardButton(text="Profile"),KeyboardButton(text="🛒 Savatcha")]
         ],
         resize_keyboard=True
     )
