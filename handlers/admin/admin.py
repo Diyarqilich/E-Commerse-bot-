@@ -47,6 +47,20 @@ async def set_role(callback: CallbackQuery, db):
     )
     await callback.answer("Role yangilandi")
 
+@router.message(F.text == "Mening buyurtmalarim", RoleFilter("Admin"))
+async def my_orders(message: Message, db):
+    user_id = message.from_user.id
+    orders = await db.get_user_orders(user_id)
+
+    if not orders:
+        await message.answer("Sizda hech qanday buyurtma yo'q.")
+        return
+
+    await message.answer("Sizning buyurtmalaringiz:")
+    for order in orders:
+        await message.answer(f"Buyurtma ID: {order['id']}\nMahsulot: {order['product_name']}\nNarxi: {order['price']}")
+
+
 @router.message(F.text == "⬅️ Orqaga", RoleFilter("Admin"))
 async def go_back(message: Message):
     await message.answer(
