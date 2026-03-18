@@ -32,8 +32,9 @@ async def add_product(msg:Message,state:FSMContext,db):
 
     data=await state.get_data()
     await db.add_product(data["name"],data["price"],data["description"])
-    await msg.answer("MMahsulot muvaffaqiyatli qo'shildi")
+    await msg.answer("MAhsulot muvaffaqiyatli qoshildi")
     await state.clear()
+
 
 @router.callback_query(F.data.startswith("adminproduct_"),RoleFilter("Admin"))
 async def product(call:CallbackQuery):
@@ -62,21 +63,11 @@ async def product(msg:Message,state:FSMContext):
     await msg.answer("Mahsulot narxinini kiriting: ")
     await state.set_state(UpdateProductState.price)
 
-@router.message(AddProductState.price)
-async def get_price(message: Message, state: FSMContext):
-
-    if message.text == "⬅️ Orqaga":
-        await state.clear()
-        await message.answer("Bekor qilindi")
-        return
-
-    if not message.text.isdigit():
-        await message.answer("Narx faqat raqam bo'lishi kerak!")
-        return
-
-    await state.update_data(price=message.text)
-    await state.set_state(AddProductState.description)
-    await message.answer("Mahsulot tavsifini kiriting:")
+@router.message(UpdateProductState.price)
+async def product(msg:Message,state:FSMContext):
+    await state.update_data(price=int(msg.text))
+    await msg.answer("Mahsulot tasnifini kiriting: ")
+    await state.set_state(UpdateProductState.description)
 
 @router.message(UpdateProductState.description)
 async def product(msg:Message,state:FSMContext,db):

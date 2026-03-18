@@ -5,12 +5,12 @@ from filters.filter import RoleFilter
 
 router=Router()
 
-@router.message(lambda msg: msg.text == "Mahsulotlar")
+@router.message(F.text == "Mahsulotlar")
 async def show_products(message: Message, db):
-    products = await db.get_products()
+    product = await db.get_products()
     await message.answer(
         "🛍 Mahsulotlar:",
-        reply_markup=products_inline(products)
+        reply_markup=products_inline(product)
     )
 
 @router.callback_query(F.data.startswith("adminproduct_"),RoleFilter("user"))
@@ -23,7 +23,7 @@ async def add_to_cart(call: CallbackQuery,db):
 
     await call.answer("Mahsulot savatchaga qo'shildi 🛒")
 
-@router.message(F.text == "🛒 Savatcha")
+@router.message(F.text == "🛒 Savatcha",RoleFilter("user"))
 async def show_cart(message: Message,db):
     user_id = await db.get_user_id(message.from_user.id)
     products = await db.get_cart_products(user_id)
@@ -36,7 +36,6 @@ async def show_cart(message: Message,db):
         "Savatchangiz:",
         reply_markup=cart_keyboard(products)
     )
-    await message.answer()
 
 @router.callback_query(F.data.startswith("remove_"))
 async def rm_product(call:CallbackQuery,db):
@@ -63,7 +62,7 @@ async def checkout(call: CallbackQuery,db):
     text = "🛒 Buyurtmangiz:\n\n"
 
     for product in products:
-        text += f"• {product['name']} - {product['price']} so'm\n"
+        text += f"•{product['name']} - {product['price']} so'm\n"
 
     text += f"\n💰 Umumiy narx: {total} so'm"
 
@@ -71,10 +70,11 @@ async def checkout(call: CallbackQuery,db):
         text,
         reply_markup=payment_keyboard()
     )
+
     await call.answer()
 
 @router.callback_query(F.data == "pay_card")
-async def pay_card(call: CallbackQuery):
+async def pay_card(call: CallbackQuery,):
 
     await call.message.answer(
         "💳 To'lov uchun karta:\n"
@@ -83,11 +83,46 @@ async def pay_card(call: CallbackQuery):
     )
     await call.answer()
 
+    My_id=8023714461
+
+    await call.bot.send_message(chat_id=My_id,text="Assalomu alaykum buyurtmani tasdiqlash uchun lokatsiya tashlang")
+
+
+@router.message(F.location)
+async def location(message: Message):
+    latitude = message.location.latitude
+    longitude = message.location.longitude
+
+    await message.answer("Lokatsiyangiz,uchun rahmat buyurtmangiz qabul qilindi")
+    await message.answer_location(latitude=latitude,longitude=longitude)
+
 @router.callback_query(F.data == "pay_cash")
 async def pay_cash(call: CallbackQuery,db):
+
+    user_id = await db.get_user_id(call.from_user.id)
+    await db.confirm_order(user_id)
 
     await call.message.answer(
         "✅ Buyurtmangiz qabul qilindi!\n"
         "Courier yetkazib berganda naqd to'laysiz."
     )
     await call.answer()
+
+@router.message(F.text == "Mening buyurtmalarim",RoleFilter("user"))
+async def story_orders(message:Message,db):
+
+    user_id = await db.get_user_id(message.from_user.id)
+    orders, total = await db.get_order_history(user_id)
+
+    if not orders:
+        await message.answer("📦 Sizda hali buyurtmalar yo'q")
+        return
+
+    text = "📦 Buyurtmalar tarixi:\n\n"
+
+    for product in orders:
+        text += f"🆔 {product['id']} | {product['name']} - {product['price']} so'm\n"
+    
+    text +=f"\n💰 Umumiy narx {total} so'm"
+
+    await message.answer(text)

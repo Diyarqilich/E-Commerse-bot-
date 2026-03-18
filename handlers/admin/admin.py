@@ -1,6 +1,6 @@
 from aiogram import F,Router
 from aiogram.types import Message,CallbackQuery
-from keyboards.reply import admin_panel_menu,start_reply_admin
+from keyboards.reply import admin_panel_menu, start_reply_admin
 from keyboards.inline import users_inline,role_inline
 from filters.filter import RoleFilter
 from aiogram.fsm.context import FSMContext
@@ -24,6 +24,10 @@ async def show_users(message: Message, db):
         reply_markup=users_inline(users)
     )
 
+@router.message(F.text == "⬅️ Orqaga", RoleFilter("Admin"))
+async def back(msg: Message):
+    await msg.answer("Orqaga", reply_markup=start_reply_admin())
+
 @router.callback_query(F.data.startswith("user_"),RoleFilter("Admin"))
 async def choose_role(callback: CallbackQuery):
     telegram_id = int(callback.data.split("_")[1]) #user_1716549072=> ["user","1716549072"]
@@ -37,36 +41,16 @@ async def choose_role(callback: CallbackQuery):
 @router.callback_query(lambda c: c.data.startswith("setrole_"),RoleFilter("Admin"))
 async def set_role(callback: CallbackQuery, db):
     _, role, telegram_id = callback.data.split("_")
+
     await db.set_user_role(
         telegram_id=int(telegram_id),
         role=role
     )
 
     await callback.message.edit_text(
-         f"✅ User roli `{role}` ga o'zgartirildi"
+        f"✅ User roli `{role}` ga o‘zgartirildi"
     )
     await callback.answer("Role yangilandi")
-
-@router.message(F.text == "Mening buyurtmalarim", RoleFilter("Admin"))
-async def my_orders(message: Message, db):
-    user_id = message.from_user.id
-    orders = await db.get_user_orders(user_id)
-
-    if not orders:
-        await message.answer("Sizda hech qanday buyurtma yo'q.")
-        return
-
-    await message.answer("Sizning buyurtmalaringiz:")
-    for order in orders:
-        await message.answer(f"Buyurtma ID: {order['id']}\nMahsulot: {order['product_name']}\nNarxi: {order['price']}")
-
-
-@router.message(F.text == "⬅️ Orqaga", RoleFilter("Admin"))
-async def go_back(message: Message):
-    await message.answer(
-        "🔙 Orqaga qaytdingiz",
-        reply_markup=start_reply_admin()
-    )
 
 async def broadcasting(bot, users, message):
     success = 0
