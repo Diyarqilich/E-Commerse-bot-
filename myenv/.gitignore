@@ -1,0 +1,45 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+
+# SQLite database (agar ishlatsang)
+db.sqlite3
+
+# Environment variables (maxfiy ma'lumotlar)
+.env
+
+# IDE / Editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Migrations (agar kerak bo'lmasa)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# PyCharm
+*.iml
+
+# Testing
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Telegram bot uchun qo'shimcha
+session/
+sessions/  
